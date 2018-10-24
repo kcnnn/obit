@@ -1,0 +1,238 @@
+
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width">
+    
+    
+    <!-- meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@justicemate, @_unwriter" />
+    <meta name="twitter:title" content="Eternal Obituary" />
+    <meta name="twitter:description" content="Post Obituaries to the BCH Blockchain via Memo.cash protocol" />
+    <meta property="og:url" content="https://unwriter.github.io/memobutton" />
+    <meta property="og:type"   content="website" />
+    <meta property="og:title" content="Eternal Obituary" />
+    <meta property="og:description" content="Post Obituaries to the BCH Blockchain via Memo.cash protocol" />
+    
+    <link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+    body {
+      background-color:#d5e0f0
+    }
+    hr {
+      margin: 20px 0;
+      border: none;
+      background: rgba(0,0,0,0.1);
+      height: 1px;
+    }
+    h1 {
+      text-shadow:1px 1px 9px lightyellow; color: white;
+    }
+    
+    .row {
+        background-color:#f5f5f5;
+    }
+    .obmsg {
+        font-family: 'Tangerine', cursive;
+        font-size: 2em;
+    
+    }
+    
+    
+    
+    </style>
+    
+    
+    
+    <script src="https://api.moneybutton.com/moneybutton.js"></script>
+    <script src='https://unpkg.com/datacash'></script>
+    <script src='https://unpkg.com/databutton'></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+    var feed = function() {
+      console.log("rendering feed");
+      
+    var query = {
+        v: 3,
+        q: { find: { "out.s2": "Obit" } }
+        };
+    
+      var b64 = btoa(JSON.stringify(query));
+      var url = "https://bitdb.network/q/" + b64;
+      
+      var header = { headers: { key: "qp4s5dkvu2rv8g4hst2sxjpeers7uu5p9uq3dugswu" } };
+      
+      // Make an HTTP request to bitdb.network public endpoint
+      fetch(url, header).then(function(r) {
+        return r.json()
+      }).then(function(r) {
+          
+    
+        var unconfirmed_feed = r.u.map(function(item) {
+          console.log("unconfirmed tx");
+          let output = item.out.filter(function(o) {
+            return o.b0.op && o.b0.op === 106;
+          })
+          // Get first line from txString for In Memory Of - name.
+          let firstLineName = output[0].s3.split('\n')[0];
+          // Get the rest of the message.....
+          let txString = output[0].s3.split('\n');
+            // remove one line, starting at the first position
+            txString.splice(0,1);
+            // join the array back into a single string
+            var obitMessage = txString.join('\n');
+            
+                if (obitMessage == ""){
+            obitMessage = firstLineName;
+            firstLineName = "";
+        }
+        
+        obitMessage = obitMessage.replace(/(?:\r\n|\r|\n)/g, '<br>');
+        obitMessage = obitMessage.replace('<br>eternalobit.com','');
+    
+          return "<div class='w3-container w3-half' style='padding-bottom: 50px;'><div class='w3-card-4'><header class='w3-container w3-dark-gray'> <p style='color:lightgrey'><strong>In memory of " + firstLineName + "</strong></p></header><div class='w3-container' style='background-color:#FAFAFA'><p class='obmsg'> "
+            + obitMessage + "</p></div><footer class='w3-container w3-dark-gray'><p style='color:lightgrey'><small>View on <a target='_blank' class='outlink' href='https://memo.cash/post/" + item.tx.h + "'>memo</a> | <a target='_blank' class='outlink' href='https://explorer.bitcoin.com/bch/tx/" + item.tx.h + "'>blockchain</a>" + " </small></p></footer></div></div>";
+        }).join("<br>")
+        var confirmed_feed = r.c.map(function(item) {
+          let output = item.out.filter(function(o) {
+            return o.b0.op && o.b0.op === 106;
+          })
+          
+          // Get first line from txString for In Memory Of - name.
+          let firstLineName = output[0].s3.split('\n')[0];
+          // Get the rest of the message.....
+          let txString = output[0].s3.split('\n');
+            // remove one line, starting at the first position
+            txString.splice(0,1);
+            // join the array back into a single string
+            var obitMessage = txString.join('\n');
+            
+        if (obitMessage == ""){
+            obitMessage = firstLineName;
+            firstLineName = "";
+        }
+        obitMessage = obitMessage.replace(/(?:\r\n|\r|\n)/g, '<br>');
+        obitMessage = obitMessage.replace('<br>eternalobit.com','');
+    
+          return "<div class='w3-container w3-half' style='padding-bottom: 50px;'><div class='w3-card-4'><header class='w3-container w3-dark-gray'> <p style='color:lightgrey'><strong>In memory of " + firstLineName + "</strong></p></header><div class='w3-container' style='background-color:#FAFAFA'><p class='obmsg'> "
+            + obitMessage + "</p></div><footer class='w3-container w3-dark-gray'><p style='color:lightgrey'><small>View on <a target='_blank' class='outlink' href='https://memo.cash/post/" + item.tx.h + "'>memo</a> | <a target='_blank' class='outlink' href='https://explorer.bitcoin.com/bch/tx/" + item.tx.h + "'>blockchain</a>" + " </small></p></footer></div></div>";
+        }).join("<br>")
+        document.querySelector(".feed").innerHTML = unconfirmed_feed + confirmed_feed;
+      })
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+      feed()
+      document.querySelector("#done").addEventListener("click", function(e) {
+        document.querySelector("#submit").classList.remove('hidden')
+        var htmlmsg = 'In memory of ' + document.querySelector("#fullname").value + '</p><p>' + document.querySelector("#msg").value;
+        var htmlmsg = htmlmsg.slice(0, 218);
+        document.getElementById('validmsg').innerHTML = 'In memory of ' + document.querySelector("#fullname").value + '</p><p>' + document.querySelector("#msg").value;
+        databutton.build({
+          data: ["0x6d0c", 'Obit', document.querySelector("#fullname").value + '\n' + document.querySelector("#msg").value + '\n' + 'eternalobit.com'],
+          button: {
+            $el: "#button",
+            label: "Post",
+            onPayment: function(e) {
+              console.log("paid!", e)
+              setTimeout(function() {
+                feed()
+              }, 1000)
+            }
+          }
+        })
+      })
+    })
+    </script>
+    </head>
+    <body>
+    <div class="w3-row">
+      <div class="w3-container"><div class="w3-container">
+        <div class="w3-twothird w3-container">
+        <h1>
+          Eternal Obituary
+         </h1>
+          <p style="text-shadow:1px 1px 5px black; color: white;">Store memories of loved ones for eternity on the BCH Blockchain</p>
+        </div>
+        <div class="w3-third w3-container">
+        <p>
+        <small>
+        <div class='center'>
+          Powered by:
+          <a href='https://moneybutton.com'>Moneybutton</a> + 
+          <a href='https://memo.cash/protocol'>Memo.cash</a> + 
+          <a href='https://bitdb.network'>BitDB</a>
+          <br />Special thanks to @_unwriter for laying the ground work.
+          Obit by @justicemate
+        </div>
+        </small>
+        </p>
+        </div>
+    </div>
+    
+          
+        <div class="w3-container"><div class="w3-container">
+        <hr>
+        <form class="w3-container w3-card-2 w3-light-grey w3-round-xlarge">
+          <p>Obit Entry Area</p>
+          <input maxlength="187-$('textarea').val().length;" class="w3-input w3-border w3-round-large" name="fullname" id="fullname" type="text" placeholder='Enter full name'><p></p>
+          <textarea maxlength="187-$('input').val().length;" id='msg' class="w3-input w3-border w3-round-large" placeholder='Enter message in memory of departed individual'></textarea>
+          <span style='text-align: right;' id="chars">187</span>
+          <br>
+          <button type='button' class='w3-button w3-green' id='done' onclick="document.getElementById('id02').style.display='block'">Validate Message</button>
+          <p></p>
+        </form>
+        </div></div>
+        <br>
+        <hr>
+        <br>
+        <div class="w3-container">
+            <div class="w3-row-padding">
+                <div class='feed'>
+            </div></div>
+        </div></div>
+        </div>
+      </div>
+      
+      <script>
+          var maxLength = 187;
+         $('textarea').keyup(function() {
+         var length = $('textarea').val().length + $('input').val().length;
+         var length = maxLength-length;
+         $('#chars').text(length);
+         $("textarea").attr('maxlength',187 - $('input').val().length);
+    });
+         $('input').keyup(function() {
+         var length = $('textarea').val().length + $('input').val().length;
+         var length = maxLength-length;
+         $('#chars').text(length);
+         $("input").attr('maxlength',187 - $('textarea').val().length);
+    }
+    
+    
+    );
+      </script>
+      
+      
+      
+      <div id="id02" class="w3-modal w3-animate-opacity">
+        <div class="w3-modal-content w3-card-4">
+          <header class="w3-container w3-teal"> 
+            <span onclick="document.getElementById('id02').style.display='none'" class="w3-button w3-large w3-display-topright">&times;</span>
+            <h2>Confirm the following Obit:</h2>
+          </header>
+          <div class="w3-container">
+            <p id='validmsg'>test</p>
+            <p id='submit'></p>
+            <p><div id='button'></div></p>
+          </div>
+          <footer class="w3-container w3-teal">
+            <p>Click the MoneyButton to Post!</p>
+          </footer>
+        </div>
+      </div>
+    </body>
+    </html>
+    
+    
