@@ -1,2 +1,2 @@
 # obit
-(live)[https://kcnnn.github.io/obit/]
+(https://kcnnn.github.io/obit/)[live]
